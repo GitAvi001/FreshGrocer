@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { JwtModule } from '@nestjs/jwt';
 import { AuthServiceController } from './auth-service.controller';
 import { AuthServiceService } from './auth-service.service';
 import { User } from './users/user.entity';
@@ -24,6 +25,19 @@ import { User } from './users/user.entity';
         autoLoadEntities: true,
         synchronize: true, // Only for development
       }),
+      inject: [ConfigService],
+    }),
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => {
+        const expiresIn = configService.get<string>('JWT_EXPIRATION') || '24h';
+        return {
+          secret: configService.get<string>('JWT_SECRET') || 'default-secret-key',
+          signOptions: {
+            expiresIn: expiresIn as any, // Type assertion for string-based expiration
+          },
+        };
+      },
       inject: [ConfigService],
     }),
   ],

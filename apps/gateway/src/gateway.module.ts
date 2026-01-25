@@ -14,6 +14,14 @@ import { GatewayService } from './gateway.service';
           port: 3001, //auth-service port 3001 configuring for TCP microservice
         },
       },
+      {
+        name: 'INVENTORY_SERVICE',
+        transport: Transport.TCP,
+        options: {
+          host: '127.0.0.1',
+          port: 3002, // inventory-service port 3002
+        },
+      },
     ]),
   ],
   controllers: [GatewayController],
