@@ -10,8 +10,8 @@ import { GatewayService } from './gateway.service';
         name: 'AUTH_SERVICE',
         transport: Transport.TCP,
         options: {
-          host: '127.0.0.1', // Use 'auth-service' if in Docker network, but localhost for local dev without Docker net for apps
-          port: 3001, //auth-service port 3001 configuring for TCP microservice
+          host: '127.0.0.1',
+          port: 3001,
         },
       },
       {
@@ -19,7 +19,15 @@ import { GatewayService } from './gateway.service';
         transport: Transport.TCP,
         options: {
           host: '127.0.0.1',
-          port: 3002, // inventory-service port 3002
+          port: 3002,
+        },
+      },
+      {
+        name: 'ORDER_SERVICE',
+        transport: Transport.TCP,
+        options: {
+          host: '127.0.0.1',
+          port: 3003,
         },
       },
     ]),

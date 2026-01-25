@@ -8,6 +8,7 @@ export class GatewayController {
     private readonly gatewayService: GatewayService,
     @Inject('AUTH_SERVICE') private readonly authClient: ClientProxy,
     @Inject('INVENTORY_SERVICE') private readonly inventoryClient: ClientProxy,
+    @Inject('ORDER_SERVICE') private readonly orderClient: ClientProxy,
   ) { }
 
   @Get('health')
@@ -103,5 +104,45 @@ export class GatewayController {
   @Delete('products/:id')
   deleteProduct(@Param('id') id: number) {
     return this.inventoryClient.send({ cmd: 'deleteProduct' }, { id: Number(id) });
+  }
+
+  // ========== Order Management Endpoints ==========
+  @Post('orders')
+  createOrder(@Body() createOrderDto: {
+    userId: number;
+    deliveryAddress: string;
+    items: { productId: number; quantity: number }[];
+  }) {
+    return this.orderClient.send({ cmd: 'createOrder' }, createOrderDto);
+  }
+
+  @Get('orders/:id')
+  getOrderById(@Param('id') id: number) {
+    return this.orderClient.send({ cmd: 'getOrderById' }, { id: Number(id) });
+  }
+
+  @Get('orders/user/:userId')
+  getOrdersByUser(@Param('userId') userId: number) {
+    return this.orderClient.send({ cmd: 'getOrdersByUser' }, { userId: Number(userId) });
+  }
+
+  @Get('orders')
+  getAllOrders() {
+    return this.orderClient.send({ cmd: 'getAllOrders' }, {});
+  }
+
+  @Patch('orders/:id/status')
+  updateOrderStatus(@Param('id') id: number, @Body() updateStatusDto: { status: string }) {
+    return this.orderClient.send({ cmd: 'updateOrderStatus' }, { id: Number(id), updateStatusDto });
+  }
+
+  @Patch('orders/:id/driver')
+  assignDriver(@Param('id') id: number, @Body() assignDriverDto: { driverId: number }) {
+    return this.orderClient.send({ cmd: 'assignDriver' }, { id: Number(id), assignDriverDto });
+  }
+
+  @Delete('orders/:id')
+  cancelOrder(@Param('id') id: number) {
+    return this.orderClient.send({ cmd: 'cancelOrder' }, { id: Number(id) });
   }
 }
