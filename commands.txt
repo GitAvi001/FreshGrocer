@@ -1,0 +1,30 @@
+Database and cache  
+------------------
+1. docker-compose up -d
+
+
+Backend
+-------
+cd ..
+
+1. npm install
+2. npm run build
+
+3. Start all services: npm run start:all
+
+4. Start gateway: npm run start:gateway
+
+5. Start auth service: npm run start:auth
+
+6. Start product service: npm run start:product
+
+7.Start order service: npm run start:order
+
+8. Start admin service: npm run start:admin
+
+
+Frontend
+--------
+1. cd apps/web
+2. npm install
+3. npm run dev

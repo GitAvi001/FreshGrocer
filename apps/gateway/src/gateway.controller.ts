@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Inject, Post, Put, Delete, Patch, Param, Query } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { GatewayService } from './gateway.service';
+import { Public } from './auth/public.decorator';
 
 @Controller()
 export class GatewayController {
@@ -11,17 +12,28 @@ export class GatewayController {
     @Inject('ORDER_SERVICE') private readonly orderClient: ClientProxy,
   ) { }
 
+  @Public()
   @Get('health')
   getHealth() {
     return { status: 'OK', service: 'API Gateway', timestamp: new Date().toISOString() };
   }
 
   // ========== Authentication Endpoints ==========
+  @Public()
   @Post('auth/register')
-  register(@Body() registerDto: { email: string; password: string; role?: string }) {
-    return this.authClient.send({ cmd: 'register' }, registerDto);
+  async register(@Body() registerDto: { email: string; password: string; role?: string }) {
+    console.log('Gateway: Registering user', registerDto.email);
+    try {
+      const result = await this.authClient.send({ cmd: 'register' }, registerDto).toPromise();
+      console.log('Gateway: Register success');
+      return result;
+    } catch (error) {
+      console.error('Gateway: Register error', error);
+      throw error;
+    }
   }
 
+  @Public()
   @Post('auth/login')
   login(@Body() loginDto: { email: string; password: string }) {
     return this.authClient.send({ cmd: 'login' }, loginDto);

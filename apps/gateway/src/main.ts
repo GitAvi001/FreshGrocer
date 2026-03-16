@@ -3,6 +3,10 @@ import { GatewayModule } from './gateway.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(GatewayModule);
-  await app.listen(process.env.port ?? 3000);
+  app.enableCors({
+    origin: process.env.FRONTEND_URL ?? 'http://localhost:3001',
+    credentials: true,
+  });
+  await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

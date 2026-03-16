@@ -19,24 +19,28 @@ export class AuthServiceService {
    */
   async register(registerDto: RegisterUserDto): Promise<AuthResponseDto> {
     const { email, password, role } = registerDto;
-
+    console.log('Registering user:', email);
     // Check if user already exists
     const existingUser = await this.userRepository.findOne({ where: { email } });
     if (existingUser) {
+      console.log('User already exists:', email);
       throw new UnauthorizedException('User with this email already exists');
     }
 
     // Hash the password
+    console.log('Hashing password...');
     const saltRounds = 10;
     const passwordHash = await bcrypt.hash(password, saltRounds);
 
     // Create and save user
+    console.log('Saving user to DB...');
     const user = this.userRepository.create({
       email,
       passwordHash,
       role: role || 'manager',
     });
     const savedUser = await this.userRepository.save(user);
+    console.log('User saved:', savedUser.id);
 
     // Generate JWT token
     const payload = { sub: savedUser.id, email: savedUser.email, role: savedUser.role };

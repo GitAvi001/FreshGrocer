@@ -1,14 +1,14 @@
 {
   "$schema": "https://json.schemastore.org/nest-cli",
   "collection": "@nestjs/schematics",
-  "sourceRoot": "apps/fresh-grocer-temp/src",
+  "sourceRoot": "apps/gateway/src",
   "compilerOptions": {
     "deleteOutDir": true,
     "webpack": true,
-    "tsConfigPath": "apps/fresh-grocer-temp/tsconfig.app.json"
+    "tsConfigPath": "apps/gateway/tsconfig.app.json"
   },
   "monorepo": true,
-  "root": "apps/fresh-grocer-temp",
+  "root": "apps/gateway",
   "projects": {
     "auth-service": {
       "type": "application",
@@ -26,15 +26,6 @@
       "sourceRoot": "libs/common/src",
       "compilerOptions": {
         "tsConfigPath": "libs/common/tsconfig.lib.json"
-      }
-    },
-    "fresh-grocer-temp": {
-      "type": "application",
-      "root": "apps/fresh-grocer-temp",
-      "entryFile": "main",
-      "sourceRoot": "apps/fresh-grocer-temp/src",
-      "compilerOptions": {
-        "tsConfigPath": "apps/fresh-grocer-temp/tsconfig.app.json"
       }
     },
     "gateway": {
