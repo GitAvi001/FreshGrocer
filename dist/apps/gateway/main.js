@@ -1,11 +1,14 @@
 /******/ (() => { // webpackBootstrap
 /******/ 	"use strict";
-/******/ 	var __webpack_modules__ = ({
+/******/ 	var __webpack_modules__ = ([
+/* 0 */,
+/* 1 */
+/***/ ((module) => {
 
-/***/ "./apps/gateway/src/auth/jwt-auth.guard.ts":
-/*!*************************************************!*\
-  !*** ./apps/gateway/src/auth/jwt-auth.guard.ts ***!
-  \*************************************************/
+module.exports = require("@nestjs/core");
+
+/***/ }),
+/* 2 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -15,85 +18,99 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
-var __metadata = (this && this.__metadata) || function (k, v) {
-    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
-};
-var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.JwtAuthGuard = void 0;
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const jwt_1 = __webpack_require__(/*! @nestjs/jwt */ "@nestjs/jwt");
-const config_1 = __webpack_require__(/*! @nestjs/config */ "@nestjs/config");
-const core_1 = __webpack_require__(/*! @nestjs/core */ "@nestjs/core");
-const public_decorator_1 = __webpack_require__(/*! ./public.decorator */ "./apps/gateway/src/auth/public.decorator.ts");
-let JwtAuthGuard = class JwtAuthGuard {
-    jwtService;
-    configService;
-    reflector;
-    constructor(jwtService, configService, reflector) {
-        this.jwtService = jwtService;
-        this.configService = configService;
-        this.reflector = reflector;
-    }
-    async canActivate(context) {
-        const isPublic = this.reflector.getAllAndOverride(public_decorator_1.IS_PUBLIC_KEY, [
-            context.getHandler(),
-            context.getClass(),
-        ]);
-        if (isPublic) {
-            return true;
-        }
-        const request = context.switchToHttp().getRequest();
-        const token = this.extractTokenFromHeader(request);
-        if (!token) {
-            throw new common_1.UnauthorizedException();
-        }
-        try {
-            const payload = await this.jwtService.verifyAsync(token, {
-                secret: this.configService.get('JWT_SECRET') || 'default-secret-key',
-            });
-            request['user'] = payload;
-        }
-        catch {
-            throw new common_1.UnauthorizedException();
-        }
-        return true;
-    }
-    extractTokenFromHeader(request) {
-        const [type, token] = request.headers.authorization?.split(' ') ?? [];
-        return type === 'Bearer' ? token : undefined;
-    }
+exports.GatewayModule = void 0;
+const common_1 = __webpack_require__(3);
+const microservices_1 = __webpack_require__(4);
+const jwt_1 = __webpack_require__(5);
+const config_1 = __webpack_require__(6);
+const core_1 = __webpack_require__(1);
+const gateway_controller_1 = __webpack_require__(7);
+const gateway_service_1 = __webpack_require__(8);
+const jwt_auth_guard_1 = __webpack_require__(10);
+let GatewayModule = class GatewayModule {
 };
-exports.JwtAuthGuard = JwtAuthGuard;
-exports.JwtAuthGuard = JwtAuthGuard = __decorate([
-    (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof jwt_1.JwtService !== "undefined" && jwt_1.JwtService) === "function" ? _a : Object, typeof (_b = typeof config_1.ConfigService !== "undefined" && config_1.ConfigService) === "function" ? _b : Object, typeof (_c = typeof core_1.Reflector !== "undefined" && core_1.Reflector) === "function" ? _c : Object])
-], JwtAuthGuard);
+exports.GatewayModule = GatewayModule;
+exports.GatewayModule = GatewayModule = __decorate([
+    (0, common_1.Module)({
+        imports: [
+            config_1.ConfigModule.forRoot({
+                isGlobal: true,
+                envFilePath: '.env',
+            }),
+            jwt_1.JwtModule.registerAsync({
+                imports: [config_1.ConfigModule],
+                useFactory: (configService) => ({
+                    secret: configService.get('JWT_SECRET') || 'default-secret-key',
+                    signOptions: { expiresIn: '24h' },
+                }),
+                inject: [config_1.ConfigService],
+            }),
+            microservices_1.ClientsModule.register([
+                {
+                    name: 'AUTH_SERVICE',
+                    transport: microservices_1.Transport.TCP,
+                    options: {
+                        host: '127.0.0.1',
+                        port: 3001,
+                    },
+                },
+                {
+                    name: 'INVENTORY_SERVICE',
+                    transport: microservices_1.Transport.TCP,
+                    options: {
+                        host: '127.0.0.1',
+                        port: 3002,
+                    },
+                },
+                {
+                    name: 'ORDER_SERVICE',
+                    transport: microservices_1.Transport.TCP,
+                    options: {
+                        host: '127.0.0.1',
+                        port: 3003,
+                    },
+                },
+            ]),
+        ],
+        controllers: [gateway_controller_1.GatewayController],
+        providers: [
+            gateway_service_1.GatewayService,
+            {
+                provide: core_1.APP_GUARD,
+                useClass: jwt_auth_guard_1.JwtAuthGuard,
+            },
+        ],
+    })
+], GatewayModule);
 
 
 /***/ }),
+/* 3 */
+/***/ ((module) => {
 
-/***/ "./apps/gateway/src/auth/public.decorator.ts":
-/*!***************************************************!*\
-  !*** ./apps/gateway/src/auth/public.decorator.ts ***!
-  \***************************************************/
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Public = exports.IS_PUBLIC_KEY = void 0;
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-exports.IS_PUBLIC_KEY = 'isPublic';
-const Public = () => (0, common_1.SetMetadata)(exports.IS_PUBLIC_KEY, true);
-exports.Public = Public;
-
+module.exports = require("@nestjs/common");
 
 /***/ }),
+/* 4 */
+/***/ ((module) => {
 
-/***/ "./apps/gateway/src/gateway.controller.ts":
-/*!************************************************!*\
-  !*** ./apps/gateway/src/gateway.controller.ts ***!
-  \************************************************/
+module.exports = require("@nestjs/microservices");
+
+/***/ }),
+/* 5 */
+/***/ ((module) => {
+
+module.exports = require("@nestjs/jwt");
+
+/***/ }),
+/* 6 */
+/***/ ((module) => {
+
+module.exports = require("@nestjs/config");
+
+/***/ }),
+/* 7 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -112,10 +129,10 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 var _a, _b, _c, _d;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.GatewayController = void 0;
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const microservices_1 = __webpack_require__(/*! @nestjs/microservices */ "@nestjs/microservices");
-const gateway_service_1 = __webpack_require__(/*! ./gateway.service */ "./apps/gateway/src/gateway.service.ts");
-const public_decorator_1 = __webpack_require__(/*! ./auth/public.decorator */ "./apps/gateway/src/auth/public.decorator.ts");
+const common_1 = __webpack_require__(3);
+const microservices_1 = __webpack_require__(4);
+const gateway_service_1 = __webpack_require__(8);
+const public_decorator_1 = __webpack_require__(9);
 let GatewayController = class GatewayController {
     gatewayService;
     authClient;
@@ -373,93 +390,7 @@ exports.GatewayController = GatewayController = __decorate([
 
 
 /***/ }),
-
-/***/ "./apps/gateway/src/gateway.module.ts":
-/*!********************************************!*\
-  !*** ./apps/gateway/src/gateway.module.ts ***!
-  \********************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.GatewayModule = void 0;
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
-const microservices_1 = __webpack_require__(/*! @nestjs/microservices */ "@nestjs/microservices");
-const jwt_1 = __webpack_require__(/*! @nestjs/jwt */ "@nestjs/jwt");
-const config_1 = __webpack_require__(/*! @nestjs/config */ "@nestjs/config");
-const core_1 = __webpack_require__(/*! @nestjs/core */ "@nestjs/core");
-const gateway_controller_1 = __webpack_require__(/*! ./gateway.controller */ "./apps/gateway/src/gateway.controller.ts");
-const gateway_service_1 = __webpack_require__(/*! ./gateway.service */ "./apps/gateway/src/gateway.service.ts");
-const jwt_auth_guard_1 = __webpack_require__(/*! ./auth/jwt-auth.guard */ "./apps/gateway/src/auth/jwt-auth.guard.ts");
-let GatewayModule = class GatewayModule {
-};
-exports.GatewayModule = GatewayModule;
-exports.GatewayModule = GatewayModule = __decorate([
-    (0, common_1.Module)({
-        imports: [
-            config_1.ConfigModule.forRoot({
-                isGlobal: true,
-                envFilePath: '.env',
-            }),
-            jwt_1.JwtModule.registerAsync({
-                imports: [config_1.ConfigModule],
-                useFactory: (configService) => ({
-                    secret: configService.get('JWT_SECRET') || 'default-secret-key',
-                    signOptions: { expiresIn: '24h' },
-                }),
-                inject: [config_1.ConfigService],
-            }),
-            microservices_1.ClientsModule.register([
-                {
-                    name: 'AUTH_SERVICE',
-                    transport: microservices_1.Transport.TCP,
-                    options: {
-                        host: '127.0.0.1',
-                        port: 3001,
-                    },
-                },
-                {
-                    name: 'INVENTORY_SERVICE',
-                    transport: microservices_1.Transport.TCP,
-                    options: {
-                        host: '127.0.0.1',
-                        port: 3002,
-                    },
-                },
-                {
-                    name: 'ORDER_SERVICE',
-                    transport: microservices_1.Transport.TCP,
-                    options: {
-                        host: '127.0.0.1',
-                        port: 3003,
-                    },
-                },
-            ]),
-        ],
-        controllers: [gateway_controller_1.GatewayController],
-        providers: [
-            gateway_service_1.GatewayService,
-            {
-                provide: core_1.APP_GUARD,
-                useClass: jwt_auth_guard_1.JwtAuthGuard,
-            },
-        ],
-    })
-], GatewayModule);
-
-
-/***/ }),
-
-/***/ "./apps/gateway/src/gateway.service.ts":
-/*!*********************************************!*\
-  !*** ./apps/gateway/src/gateway.service.ts ***!
-  \*********************************************/
+/* 8 */
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -471,7 +402,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.GatewayService = void 0;
-const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const common_1 = __webpack_require__(3);
 let GatewayService = class GatewayService {
 };
 exports.GatewayService = GatewayService;
@@ -481,58 +412,87 @@ exports.GatewayService = GatewayService = __decorate([
 
 
 /***/ }),
+/* 9 */
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
-/***/ "@nestjs/common":
-/*!*********************************!*\
-  !*** external "@nestjs/common" ***!
-  \*********************************/
-/***/ ((module) => {
 
-module.exports = require("@nestjs/common");
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.Public = exports.IS_PUBLIC_KEY = void 0;
+const common_1 = __webpack_require__(3);
+exports.IS_PUBLIC_KEY = 'isPublic';
+const Public = () => (0, common_1.SetMetadata)(exports.IS_PUBLIC_KEY, true);
+exports.Public = Public;
 
-/***/ }),
-
-/***/ "@nestjs/config":
-/*!*********************************!*\
-  !*** external "@nestjs/config" ***!
-  \*********************************/
-/***/ ((module) => {
-
-module.exports = require("@nestjs/config");
 
 /***/ }),
+/* 10 */
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
-/***/ "@nestjs/core":
-/*!*******************************!*\
-  !*** external "@nestjs/core" ***!
-  \*******************************/
-/***/ ((module) => {
 
-module.exports = require("@nestjs/core");
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.JwtAuthGuard = void 0;
+const common_1 = __webpack_require__(3);
+const jwt_1 = __webpack_require__(5);
+const config_1 = __webpack_require__(6);
+const core_1 = __webpack_require__(1);
+const public_decorator_1 = __webpack_require__(9);
+let JwtAuthGuard = class JwtAuthGuard {
+    jwtService;
+    configService;
+    reflector;
+    constructor(jwtService, configService, reflector) {
+        this.jwtService = jwtService;
+        this.configService = configService;
+        this.reflector = reflector;
+    }
+    async canActivate(context) {
+        const isPublic = this.reflector.getAllAndOverride(public_decorator_1.IS_PUBLIC_KEY, [
+            context.getHandler(),
+            context.getClass(),
+        ]);
+        if (isPublic) {
+            return true;
+        }
+        const request = context.switchToHttp().getRequest();
+        const token = this.extractTokenFromHeader(request);
+        if (!token) {
+            throw new common_1.UnauthorizedException();
+        }
+        try {
+            const payload = await this.jwtService.verifyAsync(token, {
+                secret: this.configService.get('JWT_SECRET') || 'default-secret-key',
+            });
+            request['user'] = payload;
+        }
+        catch {
+            throw new common_1.UnauthorizedException();
+        }
+        return true;
+    }
+    extractTokenFromHeader(request) {
+        const [type, token] = request.headers.authorization?.split(' ') ?? [];
+        return type === 'Bearer' ? token : undefined;
+    }
+};
+exports.JwtAuthGuard = JwtAuthGuard;
+exports.JwtAuthGuard = JwtAuthGuard = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [typeof (_a = typeof jwt_1.JwtService !== "undefined" && jwt_1.JwtService) === "function" ? _a : Object, typeof (_b = typeof config_1.ConfigService !== "undefined" && config_1.ConfigService) === "function" ? _b : Object, typeof (_c = typeof core_1.Reflector !== "undefined" && core_1.Reflector) === "function" ? _c : Object])
+], JwtAuthGuard);
 
-/***/ }),
-
-/***/ "@nestjs/jwt":
-/*!******************************!*\
-  !*** external "@nestjs/jwt" ***!
-  \******************************/
-/***/ ((module) => {
-
-module.exports = require("@nestjs/jwt");
-
-/***/ }),
-
-/***/ "@nestjs/microservices":
-/*!****************************************!*\
-  !*** external "@nestjs/microservices" ***!
-  \****************************************/
-/***/ ((module) => {
-
-module.exports = require("@nestjs/microservices");
 
 /***/ })
-
-/******/ 	});
+/******/ 	]);
 /************************************************************************/
 /******/ 	// The module cache
 /******/ 	var __webpack_module_cache__ = {};
@@ -563,17 +523,14 @@ var __webpack_exports__ = {};
 // This entry needs to be wrapped in an IIFE because it needs to be isolated against other modules in the chunk.
 (() => {
 var exports = __webpack_exports__;
-/*!**********************************!*\
-  !*** ./apps/gateway/src/main.ts ***!
-  \**********************************/
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const core_1 = __webpack_require__(/*! @nestjs/core */ "@nestjs/core");
-const gateway_module_1 = __webpack_require__(/*! ./gateway.module */ "./apps/gateway/src/gateway.module.ts");
+const core_1 = __webpack_require__(1);
+const gateway_module_1 = __webpack_require__(2);
 async function bootstrap() {
     const app = await core_1.NestFactory.create(gateway_module_1.GatewayModule);
     app.enableCors({
-        origin: process.env.FRONTEND_URL ?? 'http://localhost:3001',
+        origin: process.env.FRONTEND_URL ?? 'http://localhost:3004',
         credentials: true,
     });
     await app.listen(process.env.PORT ?? 3000);
